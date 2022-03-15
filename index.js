@@ -63,5 +63,5 @@ app.post("/api/contact", async (req, res) => {
     res.status(200).json({ status: "not-ok" });
   }
 });
-
-app.listen(process.env.PORT || 8080, () => console.log("listening"));
+const port = process.env.PORT || 8080;
+app.listen(port, () => console.log(`listening ${port}`));
