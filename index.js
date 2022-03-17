@@ -66,21 +66,34 @@ app.get("/", (req, res) => {
 app.post("/api/contact", async (req, res) => {
   try {
     const data = req.body;
-    const newContact = new Contact(data);
-    await newContact.save();
-    console.log("done");
-    await transporter
-      .sendMail({
-        from: `"Utkarsh" <utripathi_be21@thapar.edu>`,
-        to: "utripathi2002@gmail.com",
-        subject: "New Contact Request from Portfolio",
-        html: `From ${data.name} <br> Email: ${data.email} <br> Type: ${data.type} <br> Description: ${data.description}`,
-      })
-      .then(() => console.log("mail sent"));
-    res.status(200).json({ status: "ok" });
+    const findContact = await Contact.findOne({ name: data.name });
+    if (findContact) {
+      const msg = findContact.description.trim().toLowerCase();
+      if (msg === data.description.trim().toLowerCase()) {
+        res.status(200).json({
+          message: "Message already sent",
+          status: "ok",
+        });
+      }
+    } else {
+      const newContact = new Contact(data);
+      await newContact.save();
+      console.log("done");
+      await transporter
+        .sendMail({
+          from: `"Utkarsh" <utripathi_be21@thapar.edu>`,
+          to: "utripathi2002@gmail.com",
+          subject: "New Contact Request from Portfolio",
+          html: `From ${data.name} <br> Email: ${data.email} <br> Type: ${data.type} <br> Description: ${data.description}`,
+        })
+        .then(() => console.log("mail sent"));
+      res.status(200).json({ message: "Message sent", status: "ok" });
+    }
   } catch (e) {
     console.log(e);
-    res.status(200).json({ status: "not-ok" });
+    res
+      .status(200)
+      .json({ message: "Network error! Please try again.", status: "error" });
   }
 });
 
