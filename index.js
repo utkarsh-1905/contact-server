@@ -67,14 +67,15 @@ app.post("/api/contact", async (req, res) => {
   try {
     const data = req.body;
     const findContact = await Contact.findOne({ name: data.name });
-    if (findContact) {
-      const msg = findContact.description.trim().toLowerCase();
-      if (msg === data.description.trim().toLowerCase()) {
-        res.status(200).json({
-          message: "Message already sent",
-          status: "ok",
-        });
-      }
+    const msg = findContact.description.trim().toLowerCase();
+    if (
+      msg === data.description.trim().toLowerCase() &&
+      findContact.type === data.type
+    ) {
+      res.status(200).json({
+        message: "Message already sent",
+        status: "ok",
+      });
     } else {
       const newContact = new Contact(data);
       await newContact.save();
